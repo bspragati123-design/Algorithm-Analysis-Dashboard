@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADA Mini Project: Sorting Analyzer Pro</title>
+    
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bubble-color: #f43f5e;
+            --merge-color: #10b981;
+            --border: #334155;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            background: linear-gradient(135deg, #312e81, #4338ca);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.025em; }
+        header p { color: #c7d2fe; font-size: 1.05rem; font-weight: 400; }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 { font-size: 1.4rem; margin-bottom: 20px; color: var(--text); font-weight: 700; display: flex; justify-content: space-between; align-items: center;}
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        label { font-weight: 600; font-size: 0.95rem; color: var(--text-muted); }
+        
+        .input-wrapper {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 280px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn:disabled { background-color: var(--border); cursor: not-allowed; transform: none; }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+        .btn-secondary:hover { background: var(--surface-hover); color: white; }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        th, td { padding: 16px; border-bottom: 1px solid var(--border); }
+        th { background-color: #111827; color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; }
+        tbody tr { transition: background-color 0.2s; }
+        tbody tr:hover { background-color: var(--surface-hover); }
+
+        .bubble-time { color: var(--bubble-color); font-weight: 600; }
+        .merge-time { color: var(--merge-color); font-weight: 600; }
+        
+        .winner-badge {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-note {
+            font-size: 0.75rem;
+            display: block;
+            color: var(--text-muted);
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: -5px;
+        }
+
+        .loader {
+            display: none;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Algorithm analysis Dashboard</h1>
+            <p>Empirical Time Complexity Benchmarking: Bubble Sort vs. Merge Sort</p>
+        </header>
+
+        <div class="grid-layout">
+            <div class="card">
+                <h2>Test Bench Configuration</h2>
+                <div class="form-group">
+                    <label for="arraySizes">Enter Array Sizes ($n$):</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="arraySizes" value="5, 20, 100, 1000, 3000">
+                        <button class="btn" id="runBtn" onclick="startBatchBenchmark()">Run Benchmark Matrix</button>
+                    </div>
+                    <span class="hint">Separate with commas (e.g., 5, 25, 500, 2000). Small inputs automatically scale loops to map sub-millisecond precision accurately.</span>
+                    <div id="loaderStatus" class="loader">Processing data arrays, please hold...</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    Performance Logs Matrix
+                    <button class="btn-secondary" onclick="clearLogs()">Clear History</button>
+                </h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Array Dimension ($n$)</th>
+                                <th>Bubble Sort ($O(n^2)$)</th>
+                                <th>Merge Sort ($O(n \log n)$)</th>
+                                <th>Performance Factor Delta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody">
+                            <tr id="emptyRow">
+                                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                                    Configure dimensions above and execute metrics.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Sorting Algorithm Implementations ---
+        function bubbleSort(arr) {
+            let n = arr.length;
+            let swapped;
+            for (let i = 0; i < n; i++) {
+                swapped = false;
+                for (let j = 0; j < n - i - 1; j++) {
+                    if (arr[j] > arr[j + 1]) {
+                        let temp = arr[j];
+                        arr[j] = arr[j + 1];
+                        arr[j + 1] = temp;
+                        swapped = true;
+                    }
+                }
+                if (!swapped) break;
+            }
+            return arr;
+        }
+
+        function mergeSort(arr) {
+            if (arr.length <= 1) return arr;
+            let mid = Math.floor(arr.length / 2);
+            let left = mergeSort(arr.slice(0, mid));
+            let right = mergeSort(arr.slice(mid));
+            return merge(left, right);
+        }
+
+        function merge(left, right) {
+            let sorted = [];
+            let i = 0, j = 0;
+            while (i < left.length && j < right.length) {
+                if (left[i] < right[j]) {
+                    sorted.push(left[i]);
+                    i++;
+                } else {
+                    sorted.push(right[j]);
+                    j++;
+                }
+            }
+            return [...sorted, ...left.slice(i), ...right.slice(j)];
+        }
+
+        function generateRandomArray(size) {
+            let arr = new Int32Array(size);
+            for (let i = 0; i < size; i++) {
+                arr[i] = Math.floor(Math.random() * 10000);
+            }
+            return arr;
+        }
+
+        // --- Controller Engine ---
+        function clearLogs() {
+            document.getElementById("logTableBody").innerHTML = `
+                <tr id="emptyRow">
+                    <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                        Configure dimensions above and execute metrics.
+                    </td>
+                </tr>`;
+        }
+
+        function startBatchBenchmark() {
+            const inputVal = document.getElementById("arraySizes").value;
+            const runBtn = document.getElementById("runBtn");
+            const loaderStatus = document.getElementById("loaderStatus");
+            
+            const sizes = inputVal.split(',')
+                                  .map(x => parseInt(x.trim()))
+                                  .filter(num => !isNaN(num) && num > 0);
+
+            if (sizes.length === 0) {
+                alert("Please drop in valid numeric array values separated by commas.");
+                return;
+            }
+
+            runBtn.disabled = true;
+            loaderStatus.style.display = "block";
+
+            let emptyRow = document.getElementById("emptyRow");
+            if (emptyRow) emptyRow.remove();
+
+            let chain = Promise.resolve();
+            sizes.forEach(size => {
+                chain = chain.then(() => {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            executeSingleMetric(size);
+                            resolve();
+                        }, 50);
+                    });
+                });
+            });
+
+            chain.then(() => {
+                runBtn.disabled = false;
+                loaderStatus.style.display = "none";
+            });
+        }
+
+        function executeSingleMetric(size) {
+            // Determine iterations based on input size to capture fractional sub-milliseconds
+            let iterations = 1;
+            if (size <= 20) iterations = 2000;
+            else if (size <= 100) iterations = 500;
+            else if (size <= 500) iterations = 10;
+
+            let totalBubbleTime = 0;
+            let totalMergeTime = 0;
+
+            // Generate an array batch to avoid biased cache states
+            for (let k = 0; k < iterations; k++) {
+                const baseArray = generateRandomArray(size);
+
+                const bubbleCopy = [...baseArray];
+                const startBubble = performance.now();
+                bubbleSort(bubbleCopy);
+                const endBubble = performance.now();
+                totalBubbleTime += (endBubble - startBubble);
+
+                const mergeCopy = [...baseArray];
+                const startMerge = performance.now();
+                mergeSort(mergeCopy);
+                const endMerge = performance.now();
+                totalMergeTime += (endMerge - startMerge);
+            }
+
+            // Calculate exact single-execution averages
+            const bubbleTime = totalBubbleTime / iterations;
+            const mergeTime = totalMergeTime / iterations;
+
+            const tableBody = document.getElementById("logTableBody");
+            const row = tableBody.insertRow(0);
+
+            const speedMultiplier = (bubbleTime / (mergeTime || 0.0001)).toFixed(1);
+            const loopsNotice = iterations > 1 ? `<span class="badge-note">(Avg of ${iterations} loops)</span>` : '';
+
+            row.innerHTML = `
+                <td><strong>${size.toLocaleString()}</strong></td>
+                <td class="bubble-time">${bubbleTime.toFixed(4)} ms</td>
+                <td class="merge-time">${mergeTime.toFixed(4)} ms</td>
+                <td>
+                    <span class="winner-badge">Merge Sort is ${speedMultiplier}x faster</span>
+                    ${loopsNotice}
+                </td>
+            `;
+        }
+    </script>
+</body>
+</html>
